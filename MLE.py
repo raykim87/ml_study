@@ -6,25 +6,59 @@ import plotly.graph_objects as go
 import plotly.io as pio
 pio.renderers.default = 'png'
 import matplotlib.pyplot as plt
+import random
+from functools import reduce
 
 #%%
-# Let's define the population is in normal distribution with 10000 data points
+'''
+Let's define the population in normal distribution with 5,000 data points with mu at 500 and std with 50
+'''
 x_min = 0
-x_max = 10000
-x= np.arange(x_min, x_max, 1)
-y = gaussian_dist(x=x, mu=5000, std=500)
-population_noraml = pd.DataFrame({'x':x, 'y':y})
-plt.plot(population_noraml['x'], population_noraml['y'])
+x_max = 1000
+x = np.arange(x_min, x_max, 1)
+y = gaussian_dist(x = x,
+                  mu = (x_min + x_max)/2,
+                  std = 50)
+population_dist = pd.DataFrame({'x':x, 'y':y})
+plt.plot(population_dist['x'], population_dist['y'])
 plt.show()
-# fig = go.Figure()
-# fig.add_trace(go.Scatter(x = population_noraml['x'],y= population_noraml['y']))
-# fig.show()
+
+n = 0
+population = []
+while n < 5000:
+    population.append(np.random.choice(population_dist['x'], p=population_dist['y']))
+    n += 1
+
 
 #%%
-# Take 500 samples from the population
-sample = population_noraml.sample(300).reset_index(drop=True)
-plt.scatter(sample['x'], sample['y'])
+'''
+Take 1,000 samples from the population
+'''
+sample = random.sample(population, 100)
+plt.hist(sample)
 plt.show()
 
+#%%
+'''
+Assuming the std is known and we are estimating θ
+likelihood = ∏(p(D|θ))
+if θ = 100 ...
+'''
+prob_sample = gaussian_dist(np.array(sample), mu=100, std=50)
+likelihood_100 = reduce(lambda x,y: x*y, prob_sample)
+print(likelihood_100)
 
+'''
+Product of probabilities becomes very small, so let's take log of the values
+log likelihood = ∑(log(p(D|θ)))
+'''
 
+thetas = [100, 300, 500, 600, 700]
+likelihoods = []
+for theta in thetas:
+    likelihoods.append(np.sum(gaussian_dist(np.array(sample), mu=theta, std=50)))
+
+plt.bar(x=[str(t) for t in thetas], height=likelihoods)
+plt.xlabel('Theta')
+plt.ylabel('Likelihood')
+plt.show()
