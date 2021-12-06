@@ -11,30 +11,29 @@ from functools import reduce
 
 #%%
 '''
-Let's define the population in normal distribution with 5,000 data points with mu at 500 and std with 50
+Define the population in normal distribution with 5,000 data points with mu at 500 and std with 50
 '''
 x_min = 0
 x_max = 1000
-x = np.arange(x_min, x_max, 1)
-y = gaussian_dist(x = x,
-                  mu = (x_min + x_max)/2,
-                  std = 50)
-population_dist = pd.DataFrame({'x':x, 'y':y})
-plt.plot(population_dist['x'], population_dist['y'])
+mu = 500
+std = 50
+x = np.arange(x_min, x_max, 0.1)
+y = gaussian_dist(x=x,
+                  mu=mu,
+                  std=std)
+population_dist = pd.DataFrame({'x': x, 'y': y})
+population = np.random.normal(loc=mu, scale=std, size=5000)
+fix, axes = plt.subplots(1, 1)
+axes.plot(population_dist['x'], population_dist['y'])
+axes.hist(population, density=True, bins=100)
 plt.show()
-
-n = 0
-population = []
-while n < 5000:
-    population.append(np.random.choice(population_dist['x'], p=population_dist['y']))
-    n += 1
 
 
 #%%
 '''
 Take 1,000 samples from the population
 '''
-sample = random.sample(population, 100)
+sample = random.sample(list(population), 100)
 plt.hist(sample)
 plt.show()
 
@@ -49,7 +48,7 @@ likelihood_100 = reduce(lambda x,y: x*y, prob_sample)
 print(likelihood_100)
 
 '''
-Product of probabilities becomes very small, so let's take log of the values
+Product of probabilities becomes very small, take log of the values
 log likelihood = ∑(log(p(D|θ)))
 '''
 
@@ -62,3 +61,7 @@ plt.bar(x=[str(t) for t in thetas], height=likelihoods)
 plt.xlabel('Theta')
 plt.ylabel('Likelihood')
 plt.show()
+
+'''
+Likelihood is significantly greater when θ is at 500
+'''
